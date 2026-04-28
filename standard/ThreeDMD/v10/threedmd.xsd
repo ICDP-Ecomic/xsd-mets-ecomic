@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:ext3d="http://www.loc.gov/mets/eco-mic/ThreeDMD/v1"
+	targetNamespace="http://www.loc.gov/mets/eco-mic/ThreeDMD/v1"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+	<!-- Root element -->
+	<xs:element name="ThreeDMD" type="ext3d:ThreeDMDType" />
+	
+	<!-- Sequence -->
+	<xs:complexType name="ThreeDMDType">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="objectInformation" type="ext3d:ObjectInformationType"/>
+				<xs:element name="objectDerivativeInformation" type="ext3d:ObjectDerivativeInformationType"/>
+			</xs:choice>
+			<xs:element name="geometryInformation" type="ext3d:GeometryInformationType"/>
+			<xs:element name="acquisitionInformation" type="ext3d:AcquisitionInformationType" minOccurs="0"/>
+			<xs:element name="materialInformation" type="ext3d:MaterialInformationType"/>
+			<xs:element name="processingInformation" type="ext3d:ProcessingInformationType" minOccurs="0"/>
+			<xs:element name="thumbnailInformation" type="ext3d:ThumbnailInformationType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- ObjectInformation -->
+	<xs:complexType name="ObjectInformationType">
+		<xs:sequence>
+			<xs:element name="formatName" type="xs:string"/>
+			<xs:element name="dateCreated" type="xs:dateTime"/>
+			<!-- multiFileStructure è ammesso solo una volta -->
+			<xs:element name="multiFileStructure" type="ext3d:MultiFileStructureType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ObjectDerivativeInformationType">
+		<xs:complexContent>
+			<xs:extension base="ext3d:ObjectInformationType"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="MultiFileStructureType">
+		<xs:sequence>
+			<xs:element name="mainFile" type="xs:string"/>
+			<xs:element name="secondaryFile" type="xs:string" minOccurs="0"/>
+			<xs:element name="binaryFile" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- GeometryInformation -->
+	<xs:complexType name="GeometryInformationType">
+		<xs:sequence>
+			<xs:element name="vertexCount" type="xs:positiveInteger"/>
+			<xs:element name="faceCount" type="xs:positiveInteger"/>
+			<xs:element name="axisOrientation">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Right_hand_Z_up"/>
+						<xs:enumeration value="Right_hand_Y_up"/>
+						<xs:enumeration value="Right_hand_X_up"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="boundingBox">
+				<xs:complexType>
+				<!-- i valori min devono essere inferiori di max (controllo business) -->
+					<xs:sequence>
+						<xs:element name="minX" type="xs:float"/>
+						<xs:element name="maxX" type="xs:float"/>
+						<xs:element name="minY" type="xs:float"/>
+						<xs:element name="maxY" type="xs:float"/>
+						<xs:element name="minZ" type="xs:float"/>
+						<xs:element name="maxZ" type="xs:float"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="scale">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="unit" use="required">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="km"/>
+										<xs:enumeration value="m"/>
+										<xs:enumeration value="cm"/>
+										<xs:enumeration value="mm"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- MaterialInformation -->
+	<xs:complexType name="MaterialInformationType">
+		<xs:sequence>
+			<xs:element name="materialCount" type="xs:positiveInteger"/>
+			<xs:element name="materials">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="material" type="ext3d:MaterialType" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:unique name="uniqueMaterialID">
+			<xs:selector xpath="material"/>
+			<xs:field xpath="@material_id"/>
+		</xs:unique>
+	</xs:complexType>
+
+	<!-- verificare che la gerarchia sia corretta e specificare una texture per ogni material -->
+	<xs:complexType name="MaterialType">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="texture">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="type" type="xs:string" use="required"/>
+							<xs:attribute name="admid" type="xs:string" use="required"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	<!-- Vale solo per material -->
+		<xs:attribute name="material_id" type="xs:string" use="required"/>
+	<!-- vale solo per texture -->
+	</xs:complexType>
+	<!-- AcquisitionInformation -->
+	<!-- vale solo per il master -->
+	<xs:complexType name="AcquisitionInformationType">
+		<xs:sequence>
+			<xs:element name="acquisitionMethod">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="single"/>
+						<xs:enumeration value="combined"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="acquisitionSources">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="acquisitionSource"
+									type="ext3d:AcquisitionSourceType"
+									maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Tipo per ciascuna sorgente di acquisizione -->
+	<xs:complexType name="AcquisitionSourceType">
+		<xs:sequence>
+			<xs:element name="method">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="photogrammetry"/>
+						<xs:enumeration value="scanning"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="deviceManufacturer" type="xs:string" minOccurs="0"/>
+			<xs:element name="deviceModel" type="xs:string" minOccurs="0"/>
+			<xs:element name="captureSettings" type="ext3d:CaptureSettingsType" minOccurs="0"/>
+			<xs:element name="processingSoftware" type="xs:string" minOccurs="0"/>
+			<xs:element name="processingSoftwareVersion" type="xs:string" minOccurs="0"/>
+			<xs:element name="sourceFiles" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+        <xs:attribute name="id" type="xs:string" use="required"/>
+    </xs:complexType>
+	<xs:complexType name="CaptureSettingsType">
+		<xs:choice>
+			<xs:element name="photogrammetrySettings" type="ext3d:PhotogrammetrySettingsType"/>
+			<xs:element name="scanSettings" type="ext3d:ScanSettingsType"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<!-- Settings per la fotogrammetria -->
+	<xs:complexType name="PhotogrammetrySettingsType">
+		<xs:sequence>
+			<xs:element name="imageCount" type="xs:positiveInteger"/>
+			<xs:element name="resolution">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:float">
+							<xs:attribute name="unit" use="required">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="MP"/>
+										<xs:enumeration value="GP"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="focalLength">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:positiveInteger">
+							<xs:attribute name="unit" use="required">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="mm"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="aperture" type="xs:string"/>
+			<xs:element name="exposureTime">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:decimal">
+							<xs:attribute name="unit" use="required">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="sec"/>
+										<xs:enumeration value="min"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="iso" type="xs:positiveInteger"/>
+			<xs:element name="lighting" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+    <!-- Settings per la scansione -->
+	<xs:complexType name="ScanSettingsType">
+		<xs:sequence>
+			<xs:element name="scanCount" type="xs:positiveInteger"/>
+			<xs:element name="frameCount" type="xs:positiveInteger"/>
+			<xs:element name="resolution">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:decimal">
+							<xs:attribute name="unit" use="required">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="mm"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="lighting" type="xs:string"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<!-- ProcessingInformationType -->
+	<xs:complexType name="ProcessingInformationType">
+		<xs:sequence>
+			<xs:element name="description" type="xs:string"/>
+			<xs:element name="software" type="xs:string"/>
+			<xs:element name="softwareVersion" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- ThumbnailInformationType -->
+	<xs:complexType name="ThumbnailInformationType">
+		<xs:sequence>
+			<xs:element name="thumbnailGroup" type="ext3d:ThumbnailGroupType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ThumbnailGroupType">
+		<xs:sequence>
+			<xs:element name="groupName" type="xs:string"/>
+			<xs:element name="description" type="xs:string"/>
+			<xs:element name="thumbnail" type="ext3d:ThumbnailType"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="ThumbnailType">
+		<xs:sequence>
+			<xs:element name="fileName" type="xs:string"/>
+			<xs:element name="fileType" type="xs:string"/>
+			<xs:element name="width" type="xs:positiveInteger"/>
+			<xs:element name="height" type="xs:positiveInteger"/>
+			<xs:element name="viewType">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Top"/>
+						<xs:enumeration value="Bottom"/>
+						<xs:enumeration value="Left"/>
+						<xs:enumeration value="Right"/>
+						<xs:enumeration value="Perspective"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="modelVersion">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Master"/>
+						<xs:enumeration value="Derivative"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="fileReference" type="xs:string"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:complexType>
+
+</xs:schema>
