@@ -103,12 +103,13 @@
 						<xs:element name="material" type="ext3d:MaterialType" maxOccurs="unbounded"/>
 					</xs:sequence>
 				</xs:complexType>
+				<xs:unique name="uniqueMaterialID">
+					<xs:selector xpath="material"/>
+					<xs:field xpath="@material_id"/>
+				</xs:unique>
 			</xs:element>
 		</xs:sequence>
-		<xs:unique name="uniqueMaterialID">
-			<xs:selector xpath="material"/>
-			<xs:field xpath="@material_id"/>
-		</xs:unique>
+		
 	</xs:complexType>
 
 	<!-- verificare che la gerarchia sia corretta e specificare una texture per ogni material -->
