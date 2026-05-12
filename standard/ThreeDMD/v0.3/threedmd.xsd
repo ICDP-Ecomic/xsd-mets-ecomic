@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:ext3d="http://www.loc.gov/mets/eco-mic/ThreeDMD/v1"
-	targetNamespace="http://www.loc.gov/mets/eco-mic/ThreeDMD/v1"
+	xmlns:ext3d="https://icdp-ecomic.github.io/xsd-mets-ecomic/"
+	targetNamespace="https://icdp-ecomic.github.io/xsd-mets-ecomic/"
 	elementFormDefault="qualified"
 	attributeFormDefault="unqualified">
 
